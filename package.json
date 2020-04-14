@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "eosjs": "^20.0.3"
+  }
+}
