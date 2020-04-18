@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "eosjs": "^20.0.3"
+    "@slack/webhook": "^5.0.3",
+    "eosjs": "^20.0.3",
+    "node-fetch": "^2.6.0"
   }
 }
