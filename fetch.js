@@ -9,9 +9,7 @@ const { IncomingWebhook } = require('@slack/webhook');
 const signatureProvider = new JsSignatureProvider([config.PROPOSER_PRIVATE_KEY]);
 const rpc = new JsonRpc(config.RPC_HOST, { fetch });
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
-if(config.ENABLE_SLACK) {
-  const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
-}
+const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
 
 // Notify via slack
 function notify_slack(msg) {
@@ -115,7 +113,7 @@ function propose(kicking_proposal){
         name: 'propose',
         authorization: [{
           actor: config.PROPOSER_ACCOUNT,
-          permission: 'propose',
+          permission: 'active',
         }],
         data: {
           proposer: config.PROPOSER_ACCOUNT,

@@ -1,6 +1,6 @@
 const RPC_HOST = 'https://api.eoslaomao.com:443';
 const ALOHA_TRACKER_ACCOUNT = 'alohatracker'
-const PROPOSER_ACCOUNT = 'eoslaomao.bp'
+const PROPOSER_ACCOUNT = 'goodproposer'
 const PROPOSER_PRIVATE_KEY = process.env.PROPOSER_PRIVATE_KEY
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
 const ENABLE_SLACK = process.env.ENABLE_SLACK
@@ -21,5 +21,6 @@ module.exports = {
   PROPOSER_PRIVATE_KEY,
   BP_ACCOUNT,
   BP_PERMISSION,
+  ENABLE_SLACK,
   SLACK_WEBHOOK_URL
 }
