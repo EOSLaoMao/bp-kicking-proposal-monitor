@@ -9,17 +9,21 @@ const { IncomingWebhook } = require('@slack/webhook');
 const signatureProvider = new JsSignatureProvider([config.PROPOSER_PRIVATE_KEY]);
 const rpc = new JsonRpc(config.RPC_HOST, { fetch });
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
-const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
+if(config.ENABLE_SLACK) {
+  const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
+}
 
 // Notify via slack
 function notify_slack(msg) {
   console.log(msg);
-  // Send the notification via slack
-  (async () => {
-    await webhook.send({
-      text: msg
-    });
-  })();
+  if(config.ENABLE_SLACK) {
+    // Send the notification via slack
+    (async () => {
+      await webhook.send({
+        text: msg
+      });
+    })();
+  }
 }
 
 // Check proposals from Aloha Tracker
@@ -74,7 +78,7 @@ function monitor(){
 function propose(kicking_proposal){
   const now = Date();
   (async () => {
-    //Step1: generate approval transaction
+    //Step1: generate approval transaction payload
     const result = await api.transact({
       actions: [{
         account: 'eosio.msig',
@@ -104,14 +108,14 @@ function propose(kicking_proposal){
     const data = await api.serializeActions(tx.actions)
     tx.actions[0].data = data[0].data;
 
-    //Step3: send transaction to propose approval transaction :)
+    //Step3: send approval transaction as payload of another proposal
     const proposal = await api.transact({
       actions: [{
         account: 'eosio.msig',
         name: 'propose',
         authorization: [{
           actor: config.PROPOSER_ACCOUNT,
-          permission: 'active',
+          permission: 'propose',
         }],
         data: {
           proposer: config.PROPOSER_ACCOUNT,
