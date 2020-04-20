@@ -1,6 +1,6 @@
 const RPC_HOST = 'https://api.eoslaomao.com:443';
 const ALOHA_TRACKER_ACCOUNT = 'alohatracker'
-const PROPOSER_ACCOUNT = 'goodproposer'
+const PROPOSER_ACCOUNT = 'laomaoserver'
 const PROPOSER_PRIVATE_KEY = process.env.PROPOSER_PRIVATE_KEY
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
 const ENABLE_SLACK = process.env.ENABLE_SLACK
