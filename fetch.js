@@ -215,7 +215,7 @@ function monitor(){
     }
   })();
   // Check proposals every minute
-  setTimeout(monitor, 1000 * 6);
+  setTimeout(monitor, 1000 * 60);
 }
 
 monitor();
