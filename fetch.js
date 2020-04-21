@@ -24,10 +24,10 @@ function notify_slack(msg) {
   }
 }
 
-// Check proposals from Aloha Tracker
 function monitor(){
   const now = Date();
   (async () => {
+    // Get proposals from Aloha Tracker
     let resp = await rpc.get_table_rows({
       json: true,                                 // Get the response as json
       code: 'eosio.msig',                         // Contract that we target
@@ -38,7 +38,7 @@ function monitor(){
     });
     let kicking_proposals = resp.rows;
 
-    //get proposed kicking proposals
+    // Get proposed kicking proposals by config.PROPOSER_ACCOUNT
     resp = await rpc.get_table_rows({
       json: true,                     // Get the response as json
       code: 'eosio.msig',             // Contract that we target
@@ -51,13 +51,14 @@ function monitor(){
 
     if(kicking_proposals.length == 0) {
       if(proposed_proposals.length > 0) {
-        //cancel proposed proposals
+        // No kicking_proposals, meaning all proposed_proposals should be canceled
+        // Cancel proposed proposals
         proposed_proposals.forEach(function(p){
           cancel_proposal(p);
         });
       }
     } else {
-      // Only process the first kicking proposal
+      // Only process the first(newest) kicking proposal
       let kicking_proposal = kicking_proposals[0];
       let msg = util.format('Found kicking proposal: %s. Time: %s', kicking_proposal.proposal_name, now);
       notify_slack(msg);
@@ -70,18 +71,19 @@ function monitor(){
       });
       if(proposal_needed) {
         console.log("Prepare to approve kicking proposal:", kicking_proposal.proposal_name);
-        //Step2: propose to approve this new proposal
+        //Step2: propose to approve this kicking proposal
         propose(kicking_proposal)
       }
     }
   })();
+  // Check proposals every minute
   setTimeout(monitor, 1000 * 60);
 }
 
 function cancel_proposal(proposal){
   const now = Date();
   (async () => {
-    //cancel proposal
+    // Cancel proposal
     const transaction = await api.transact({
       actions: [{
         account: 'eosio.msig',
@@ -101,7 +103,7 @@ function cancel_proposal(proposal){
       expireSeconds: 30 * 60, // 30 minutes to expire
     });
 
-    let msg = util.format('Canceled proposal %d: https://bloks.io/transaction/%s time: %s', proposal.proposal_name, transaction.transaction_id, now);
+    let msg = util.format('Canceled outdated proposal %d: https://bloks.io/transaction/%s time: %s', proposal.proposal_name, transaction.transaction_id, now);
     notify_slack(msg)
   })();
 }
@@ -140,7 +142,8 @@ function propose(kicking_proposal){
     const data = await api.serializeActions(tx.actions)
     tx.actions[0].data = data[0].data;
 
-    //Step3: send approval transaction as payload of another proposal
+    //Step3: send approval transaction(to approve kicking proposal) 
+    //       as payload of another proposal
     const proposal = await api.transact({
       actions: [{
         account: 'eosio.msig',
