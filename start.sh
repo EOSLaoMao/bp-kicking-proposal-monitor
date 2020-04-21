@@ -1,1 +1,1 @@
-docker run -d -h eos-auto-kicker -e PROPOSER_PRIVATE_KEY=$1 -e ENABLE_SLACK=$2 -e SLACK_WEBHOOK_URL=$3 -e SENTRY_DSN=$4 eoslaomao/eos-auto-kicker:0.5
+docker run -d -h eos-auto-kicker -e PROPOSER_ACCOUNT=$1 PROPOSER_PRIVATE_KEY=$2 -e BP_ACCOUNT=$3 -e BP_PERMISSION_NAME=$4 -e ENABLE_SLACK=$5 -e SLACK_WEBHOOK_URL=$6 -e SENTRY_DSN=$7 eoslaomao/eos-auto-kicker:0.6
