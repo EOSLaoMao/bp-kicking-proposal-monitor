@@ -1,15 +1,17 @@
 const config = require('./config')
-const fetch = require('node-fetch');
+const Fetch = require('node-fetch');
 const util = require('util');
+const Sentry = require('@sentry/node');
 const { Api, JsonRpc, RpcError } = require('eosjs');
 const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');
 const { TextEncoder, TextDecoder } = require('util'); // native TextEncoder/Decoder
 const { IncomingWebhook } = require('@slack/webhook');
 
 const signatureProvider = new JsSignatureProvider([config.PROPOSER_PRIVATE_KEY]);
-const rpc = new JsonRpc(config.RPC_HOST, { fetch });
+const rpc = new JsonRpc(config.RPC_HOST, { Fetch });
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
+Sentry.init({ dsn: config.SENTRY_DSN });
 
 // Notify via slack
 function notify_slack(msg) {
