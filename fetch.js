@@ -1,5 +1,5 @@
 const config = require('./config')
-const Fetch = require('node-fetch');
+const fetch = require('node-fetch');
 const util = require('util');
 const Sentry = require('@sentry/node');
 const { Api, JsonRpc, RpcError } = require('eosjs');
@@ -8,7 +8,7 @@ const { TextEncoder, TextDecoder } = require('util'); // native TextEncoder/Deco
 const { IncomingWebhook } = require('@slack/webhook');
 
 const signatureProvider = new JsSignatureProvider([config.PROPOSER_PRIVATE_KEY]);
-const rpc = new JsonRpc(config.RPC_HOST, { Fetch });
+const rpc = new JsonRpc(config.RPC_HOST, { fetch });
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
 Sentry.init({ dsn: config.SENTRY_DSN });
@@ -146,8 +146,6 @@ function propose(kicking_proposal){
   })();
 }
 
-
-
 function monitor(){
   const now = Date();
   (async () => {
@@ -162,6 +160,7 @@ function monitor(){
         reverse: false                              // False, means newest appear first
       });
       let kicking_proposals = resp.rows;
+      console.log("kicking_proposals:", kicking_proposals);
 
       // Get proposed kicking proposals by config.PROPOSER_ACCOUNT
       resp = await rpc.get_table_rows({
@@ -174,6 +173,8 @@ function monitor(){
       });
       let proposed_proposals = resp.rows;
 
+      console.log("proposed_proposals:", proposed_proposals);
+      
       if(kicking_proposals.length == 0) {
         if(proposed_proposals.length > 0) {
           // No kicking_proposals, meaning all proposed_proposals should be canceled
@@ -200,6 +201,7 @@ function monitor(){
           propose(kicking_proposal)
         }
       }
+      
     } catch (err) {
       console.log('monitor error->', err);
     }
