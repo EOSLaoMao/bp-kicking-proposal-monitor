@@ -36,33 +36,40 @@ function monitor(){
       limit: 10,                                  // Maximum number of rows that we want to get
       reverse: false                              // False, means newest appear first
     });
-    rows = resp.rows;
-    //only process the first proposal if exist
-    if(rows.length == 0) {
-      console.log("No kicking propose found. Time:", now);
+    let kicking_proposals = resp.rows;
+
+    //get proposed kicking proposals
+    resp = await rpc.get_table_rows({
+      json: true,                     // Get the response as json
+      code: 'eosio.msig',             // Contract that we target
+      scope: config.PROPOSER_ACCOUNT, // Account that owns the data
+      table: 'proposal',              // Table name
+      limit: 10,                      // Maximum number of rows that we want to get
+      reverse: false                  // False, means newest appear first
+    });
+    let proposed_proposals = resp.rows;
+
+    if(kicking_proposals.length == 0) {
+      if(proposed_proposals.length > 0) {
+        //cancel proposed proposals
+        proposed_proposals.forEach(function(p){
+          cancel_proposal(p);
+        });
+      }
     } else {
-      let kicking_proposal = rows[0].proposal_name;
-      let msg = util.format('Found kicking proposal: %s. Time: %s', kicking_proposal, now);
+      // Only process the first kicking proposal
+      let kicking_proposal = kicking_proposals[0];
+      let msg = util.format('Found kicking proposal: %s. Time: %s', kicking_proposal.proposal_name, now);
       notify_slack(msg);
-      //Step1: make sure the proposal is not processed by prior tasks
-      resp = await rpc.get_table_rows({
-        json: true,                     // Get the response as json
-        code: 'eosio.msig',             // Contract that we target
-        scope: config.PROPOSER_ACCOUNT, // Account that owns the data
-        table: 'proposal',              // Table name
-        limit: 10,                      // Maximum number of rows that we want to get
-        reverse: false                  // False, means newest appear first
-      });
-      let proposal_needed = true;
-      resp.rows.forEach(function(value){
-        if(value.proposal_name == kicking_proposal) {
-          let msg = util.format('Kicking proposal already proposed. https://bloks.io/msig/%s/%s Time: %s', config.PROPOSER_ACCOUNT, kicking_proposal, now);
+      proposed_proposals.forEach(function(value){
+        if(value.proposal_name == kicking_proposal.proposal_name) {
+          let msg = util.format('Kicking proposal already proposed, please review ASAP: https://bloks.io/msig/%s/%s Time: %s', config.PROPOSER_ACCOUNT, kicking_proposal.proposal_name, now);
           notify_slack(msg);
           proposal_needed = false;
         }
       });
       if(proposal_needed) {
-        console.log("Prepare to approve kicking proposal:", kicking_proposal);
+        console.log("Prepare to approve kicking proposal:", kicking_proposal.proposal_name);
         //Step2: propose to approve this new proposal
         propose(kicking_proposal)
       }
@@ -71,42 +78,69 @@ function monitor(){
   setTimeout(monitor, 1000 * 60);
 }
 
+function cancel_proposal(proposal){
+  const now = Date();
+  (async () => {
+    //cancel proposal
+    const transaction = await api.transact({
+      actions: [{
+        account: 'eosio.msig',
+        name: 'cancel',
+        authorization: [{
+          actor: config.PROPOSER_ACCOUNT,
+          permission: 'active',
+        }],
+        data: {
+          proposer: config.PROPOSER_ACCOUNT,
+          proposal_name: proposal.proposal_name,
+          canceler: config.PROPOSER_ACCOUNT
+        },
+      }]
+    }, {
+      blocksbehind: 3,
+      expireseconds: 30 * 60, // 30 minutes to expire
+    });
+
+    let msg = util.format('Canceled proposal %d: https://bloks.io/transaction/%s time: %s', proposal.proposal_name, transaction.transaction_id, now);
+    notify_slack(msg)
+  })();
+}
 
 //function to propose to approve kicking proposal
 function propose(kicking_proposal){
   const now = Date();
   (async () => {
-    //Step1: generate approval transaction payload
+    //step1: generate approval transaction payload
     const result = await api.transact({
       actions: [{
         account: 'eosio.msig',
         name: 'approve',
         authorization: [{
-          actor: config.BP_ACCOUNT,
+          actor: config.bp_account,
           permission: 'active',
         }],
         data: {
-          proposer: config.ALOHA_TRACKER_ACCOUNT,
-          proposal_name: kicking_proposal,
+          proposer: config.aloha_tracker_account,
+          proposal_name: kicking_proposal.proposal_name,
           level: {
-            "actor": config.BP_ACCOUNT,
+            "actor": config.bp_account,
             "permission": "active"
           }
         },
       }]
     }, {
-      blocksBehind: 3,
-      expireSeconds: 30 * 60, // 30 minutes to expire
+      blocksbehind: 3,
+      expireseconds: 30 * 60, // 30 minutes to expire
       broadcast: false,
       sign: false
     });
 
-    //Step2: deserialize transaction back to JSON
-    const tx = await api.deserializeTransactionWithActions(result.serializedTransaction);
-    const data = await api.serializeActions(tx.actions)
+    //step2: deserialize transaction back to json
+    const tx = await api.deserializetransactionwithactions(result.serializedtransaction);
+    const data = await api.serializeactions(tx.actions)
     tx.actions[0].data = data[0].data;
 
-    //Step3: send approval transaction as payload of another proposal
+    //step3: send approval transaction as payload of another proposal
     const proposal = await api.transact({
       actions: [{
         account: 'eosio.msig',
@@ -117,14 +151,14 @@ function propose(kicking_proposal){
         }],
         data: {
           proposer: config.PROPOSER_ACCOUNT,
-          proposal_name: kicking_proposal,
-          requested: config.BP_PERMISSION,
+          proposal_name: kicking_proposal.proposal_name,
+          requested: config.bp_permission,
           trx: tx
         },
       }]
     }, {
-      blocksBehind: 3,
-      expireSeconds: 30 * 60, // 30 minutes to expire
+      blocksbehind: 3,
+      expireseconds: 30 * 60, // 30 minutes to expire
     });
 
     /*
@@ -133,7 +167,7 @@ function propose(kicking_proposal){
       processed: {
         id:'d93111537dc771f34ec866eba40daaaee6b92e69af5351ccf3151bb6f4437c10',
         block_num: 115456895,
-        block_time: '2020-04-14T12:07:04.500',
+        block_time: '2020-04-14t12:07:04.500',
         producer_block_id: null,
         receipt: {
           status: 'executed',
@@ -150,7 +184,7 @@ function propose(kicking_proposal){
       }
     }
     */
-    let msg = util.format('Proposed a proposal to remove block producer, please review: https://bloks.io/transaction/%s Time: %s', proposal.transaction_id, now);
+    let msg = util.format('proposed a proposal to remove block producer, please review: https://bloks.io/transaction/%s time: %s', proposal.transaction_id, now);
     notify_slack(msg)
   })();
 }
