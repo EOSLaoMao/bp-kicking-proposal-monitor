@@ -10,8 +10,14 @@ const { IncomingWebhook } = require('@slack/webhook');
 const signatureProvider = new JsSignatureProvider([config.PROPOSER_PRIVATE_KEY]);
 const rpc = new JsonRpc(config.RPC_HOST, { fetch });
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
-const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
-Sentry.init({ dsn: config.SENTRY_DSN });
+let ENABLE_SLACK = false
+if(config.SLACK_WEBHOOK_URL) {
+  const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
+  ENABLE_SLACK = true
+}
+if(config.SENTRY_DSN) {
+  Sentry.init({ dsn: config.SENTRY_DSN });
+}
 
 //validate BP permission first
 function fetch_bp_permission() {
@@ -34,7 +40,7 @@ function fetch_bp_permission() {
 // Notify via slack
 function notify_slack(msg) {
   console.log(msg);
-  if(config.ENABLE_SLACK) {
+  if(ENABLE_SLACK) {
     // Send the notification via slack
     (async () => {
       await webhook.send({

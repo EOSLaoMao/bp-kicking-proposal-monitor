@@ -1,21 +1,19 @@
-const RPC_HOST = 'https://api.eoslaomao.com:443'
-const ALOHA_TRACKER_ACCOUNT = 'alohatracker'
+const ALOHA_TRACKER_ACCOUNT = 'alohatracker' // This account is fixed, DO NOT MODIFY
+const RPC_HOST = process.env.RPC_HOST || 'https://api.eoslaomao.com:443'
+const BP_ACCOUNT = process.env.BP_ACCOUNT
+const BP_PERMISSION_NAME = process.env.BP_PERMISSION_NAME || 'active'
 const PROPOSER_ACCOUNT = process.env.PROPOSER_ACCOUNT
 const PROPOSER_PRIVATE_KEY = process.env.PROPOSER_PRIVATE_KEY
-const ENABLE_SLACK = process.env.ENABLE_SLACK
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL
 const SENTRY_DSN = process.env.SENTRY_DSN
-const BP_ACCOUNT = process.env.BP_ACCOUNT
-const BP_PERMISSION_NAME = process.env.BP_PERMISSION_NAME
 
 module.exports = {
   RPC_HOST,
   ALOHA_TRACKER_ACCOUNT,
-  PROPOSER_ACCOUNT,
-  PROPOSER_PRIVATE_KEY,
   BP_ACCOUNT,
   BP_PERMISSION_NAME,
-  ENABLE_SLACK,
+  PROPOSER_ACCOUNT,
+  PROPOSER_PRIVATE_KEY,
   SLACK_WEBHOOK_URL,
   SENTRY_DSN
 }
