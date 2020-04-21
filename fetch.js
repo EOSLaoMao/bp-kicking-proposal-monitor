@@ -97,8 +97,8 @@ function cancel_proposal(proposal){
         },
       }]
     }, {
-      blocksbehind: 3,
-      expireseconds: 30 * 60, // 30 minutes to expire
+      blocksBehind: 3,
+      expireSeconds: 30 * 60, // 30 minutes to expire
     });
 
     let msg = util.format('Canceled proposal %d: https://bloks.io/transaction/%s time: %s', proposal.proposal_name, transaction.transaction_id, now);
@@ -116,31 +116,31 @@ function propose(kicking_proposal){
         account: 'eosio.msig',
         name: 'approve',
         authorization: [{
-          actor: config.bp_account,
+          actor: config.BP_ACCOUNT,
           permission: 'active',
         }],
         data: {
-          proposer: config.aloha_tracker_account,
+          proposer: config.ALOHA_TRACKER_ACCOUNT,
           proposal_name: kicking_proposal.proposal_name,
           level: {
-            "actor": config.bp_account,
+            "actor": config.BP_ACCOUNT,
             "permission": "active"
           }
         },
       }]
     }, {
-      blocksbehind: 3,
-      expireseconds: 30 * 60, // 30 minutes to expire
+      blocksBehind: 3,
+      expireSeconds: 30 * 60, // 30 minutes to expire
       broadcast: false,
       sign: false
     });
 
-    //step2: deserialize transaction back to json
-    const tx = await api.deserializetransactionwithactions(result.serializedtransaction);
-    const data = await api.serializeactions(tx.actions)
+    //Step2: deserialize transaction back to JSON
+    const tx = await api.deserializeTransactionWithActions(result.serializedTransaction);
+    const data = await api.serializeActions(tx.actions)
     tx.actions[0].data = data[0].data;
 
-    //step3: send approval transaction as payload of another proposal
+    //Step3: send approval transaction as payload of another proposal
     const proposal = await api.transact({
       actions: [{
         account: 'eosio.msig',
@@ -152,13 +152,13 @@ function propose(kicking_proposal){
         data: {
           proposer: config.PROPOSER_ACCOUNT,
           proposal_name: kicking_proposal.proposal_name,
-          requested: config.bp_permission,
+          requested: config.BP_PERMISSION,
           trx: tx
         },
       }]
     }, {
-      blocksbehind: 3,
-      expireseconds: 30 * 60, // 30 minutes to expire
+      blocksBehind: 3,
+      expireSeconds: 30 * 60, // 30 minutes to expire
     });
 
     /*
@@ -167,7 +167,7 @@ function propose(kicking_proposal){
       processed: {
         id:'d93111537dc771f34ec866eba40daaaee6b92e69af5351ccf3151bb6f4437c10',
         block_num: 115456895,
-        block_time: '2020-04-14t12:07:04.500',
+        block_time: '2020-04-14T12:07:04.500',
         producer_block_id: null,
         receipt: {
           status: 'executed',
@@ -184,7 +184,7 @@ function propose(kicking_proposal){
       }
     }
     */
-    let msg = util.format('proposed a proposal to remove block producer, please review: https://bloks.io/transaction/%s time: %s', proposal.transaction_id, now);
+    let msg = util.format('Proposed a proposal to remove block producer, please review: https://bloks.io/transaction/%s Time: %s', proposal.transaction_id, now);
     notify_slack(msg)
   })();
 }
