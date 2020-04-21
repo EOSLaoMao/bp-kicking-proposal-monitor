@@ -49,7 +49,7 @@ function cancel_proposal(proposal){
       expireSeconds: 30 * 60, // 30 minutes to expire
     });
 
-    let msg = util.format('Canceled outdated proposal %d: https://bloks.io/transaction/%s time: %s', proposal.proposal_name, transaction.transaction_id, now);
+    let msg = util.format('Canceled outdated proposal %s: https://bloks.io/transaction/%s time: %s', proposal.proposal_name, transaction.transaction_id, now);
     notify_slack(msg);
   })();
 }
