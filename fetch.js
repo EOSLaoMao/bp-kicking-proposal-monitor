@@ -11,6 +11,7 @@ const signatureProvider = new JsSignatureProvider([config.PROPOSER_PRIVATE_KEY])
 const rpc = new JsonRpc(config.RPC_HOST, { Fetch });
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
+Sentry.init({ dsn: config.SENTRY_DSN });
 
 // Notify via slack
 function notify_slack(msg) {
