@@ -151,7 +151,7 @@ function monitor(){
       reverse: false                              // False, means newest appear first
     });
     let kicking_proposals = resp.rows;
-    console.log("kicking_proposals:", kicking_proposals);
+    //console.log("kicking_proposals:", kicking_proposals);
 
     // Get proposed kicking proposals by config.PROPOSER_ACCOUNT
     resp = await rpc.get_table_rows({
@@ -164,7 +164,7 @@ function monitor(){
     });
     let proposed_proposals = resp.rows;
 
-    console.log("proposed_proposals:", proposed_proposals);
+    //console.log("proposed_proposals:", proposed_proposals);
     
     if(kicking_proposals.length == 0) {
       if(proposed_proposals.length > 0) {
