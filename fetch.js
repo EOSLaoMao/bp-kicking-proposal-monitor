@@ -110,7 +110,7 @@ function cancel_proposal(proposal){
 function propose(kicking_proposal){
   const now = Date();
   (async () => {
-    //step1: generate approval transaction payload
+    //Step1: generate approval transaction payload
     const result = await api.transact({
       actions: [{
         account: 'eosio.msig',
