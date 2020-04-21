@@ -1,5 +1,5 @@
-const RPC_HOST = 'https://api.eoslaomao.com:443'
-const ALOHA_TRACKER_ACCOUNT = 'alohatracker'
+const ALOHA_TRACKER_ACCOUNT = 'alohatracker' // This account is fixed, DO NOT MODIFY
+const RPC_HOST = process.env.RPC_HOST || 'https://api.eoslaomao.com:443'
 const BP_ACCOUNT = process.env.BP_ACCOUNT
 const BP_PERMISSION_NAME = process.env.BP_PERMISSION_NAME || 'active'
 const PROPOSER_ACCOUNT = process.env.PROPOSER_ACCOUNT
