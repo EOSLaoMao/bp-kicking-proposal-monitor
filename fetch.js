@@ -26,66 +26,6 @@ function notify_slack(msg) {
   }
 }
 
-function monitor(){
-  const now = Date();
-  (async () => {
-    try {
-      // Get proposals from Aloha Tracker
-      let resp = await rpc.get_table_rows({
-        json: true,                                 // Get the response as json
-        code: 'eosio.msig',                         // Contract that we target
-        scope: config.ALOHA_TRACKER_ACCOUNT,        // Account that owns the data
-        table: 'proposal',                          // Table name
-        limit: 10,                                  // Maximum number of rows that we want to get
-        reverse: false                              // False, means newest appear first
-      });
-      let kicking_proposals = resp.rows;
-
-      // Get proposed kicking proposals by config.PROPOSER_ACCOUNT
-      resp = await rpc.get_table_rows({
-        json: true,                     // Get the response as json
-        code: 'eosio.msig',             // Contract that we target
-        scope: config.PROPOSER_ACCOUNT, // Account that owns the data
-        table: 'proposal',              // Table name
-        limit: 10,                      // Maximum number of rows that we want to get
-        reverse: false                  // False, means newest appear first
-      });
-      let proposed_proposals = resp.rows;
-
-      if(kicking_proposals.length == 0) {
-        if(proposed_proposals.length > 0) {
-          // No kicking_proposals, meaning all proposed_proposals should be canceled
-          // Cancel proposed proposals
-          proposed_proposals.forEach(function(p){
-            cancel_proposal(p);
-          });
-        }
-      } else {
-        // Only process the first(newest) kicking proposal
-        let kicking_proposal = kicking_proposals[0];
-        let msg = util.format('Found kicking proposal: %s. Time: %s', kicking_proposal.proposal_name, now);
-        notify_slack(msg);
-        proposed_proposals.forEach(function(value){
-          if(value.proposal_name == kicking_proposal.proposal_name) {
-            let msg = util.format('Kicking proposal already proposed, please review ASAP: https://bloks.io/msig/%s/%s Time: %s', config.PROPOSER_ACCOUNT, kicking_proposal.proposal_name, now);
-            notify_slack(msg);
-            proposal_needed = false;
-          }
-        });
-        if(proposal_needed) {
-          console.log("Prepare to approve kicking proposal:", kicking_proposal.proposal_name);
-          //Step2: propose to approve this kicking proposal
-          propose(kicking_proposal)
-        }
-      }
-    } catch (err) {
-      console.log('monitor error->', err);
-    }
-  })();
-  // Check proposals every minute
-  setTimeout(monitor, 1000 * 60);
-}
-
 function cancel_proposal(proposal){
   const now = Date();
   (async () => {
@@ -204,6 +144,68 @@ function propose(kicking_proposal){
       console.log('propose err->', err);
     }
   })();
+}
+
+
+
+function monitor(){
+  const now = Date();
+  (async () => {
+    try {
+      // Get proposals from Aloha Tracker
+      let resp = await rpc.get_table_rows({
+        json: true,                                 // Get the response as json
+        code: 'eosio.msig',                         // Contract that we target
+        scope: config.ALOHA_TRACKER_ACCOUNT,        // Account that owns the data
+        table: 'proposal',                          // Table name
+        limit: 10,                                  // Maximum number of rows that we want to get
+        reverse: false                              // False, means newest appear first
+      });
+      let kicking_proposals = resp.rows;
+
+      // Get proposed kicking proposals by config.PROPOSER_ACCOUNT
+      resp = await rpc.get_table_rows({
+        json: true,                     // Get the response as json
+        code: 'eosio.msig',             // Contract that we target
+        scope: config.PROPOSER_ACCOUNT, // Account that owns the data
+        table: 'proposal',              // Table name
+        limit: 10,                      // Maximum number of rows that we want to get
+        reverse: false                  // False, means newest appear first
+      });
+      let proposed_proposals = resp.rows;
+
+      if(kicking_proposals.length == 0) {
+        if(proposed_proposals.length > 0) {
+          // No kicking_proposals, meaning all proposed_proposals should be canceled
+          // Cancel proposed proposals
+          proposed_proposals.forEach(function(p){
+            cancel_proposal(p);
+          });
+        }
+      } else {
+        // Only process the first(newest) kicking proposal
+        let kicking_proposal = kicking_proposals[0];
+        let msg = util.format('Found kicking proposal: %s. Time: %s', kicking_proposal.proposal_name, now);
+        notify_slack(msg);
+        proposed_proposals.forEach(function(value){
+          if(value.proposal_name == kicking_proposal.proposal_name) {
+            let msg = util.format('Kicking proposal already proposed, please review ASAP: https://bloks.io/msig/%s/%s Time: %s', config.PROPOSER_ACCOUNT, kicking_proposal.proposal_name, now);
+            notify_slack(msg);
+            proposal_needed = false;
+          }
+        });
+        if(proposal_needed) {
+          console.log("Prepare to approve kicking proposal:", kicking_proposal.proposal_name);
+          //Step2: propose to approve this kicking proposal
+          propose(kicking_proposal)
+        }
+      }
+    } catch (err) {
+      console.log('monitor error->', err);
+    }
+  })();
+  // Check proposals every minute
+  setTimeout(monitor, 1000 * 60);
 }
 
 monitor();
