@@ -205,6 +205,7 @@ function monitor(){
         let kicking_proposal = kicking_proposals[0];
         let msg = util.format('Found kicking proposal: %s. Time: %s', kicking_proposal.proposal_name, now);
         notify_slack(msg);
+        let proposal_needed = true;
         proposed_proposals.forEach(function(value){
           if(value.proposal_name == kicking_proposal.proposal_name) {
             let msg = util.format('Kicking proposal already proposed, please review ASAP: https://bloks.io/msig/%s/%s Time: %s', config.PROPOSER_ACCOUNT, kicking_proposal.proposal_name, now);
