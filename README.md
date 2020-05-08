@@ -60,7 +60,7 @@ We believe, with this little tool, the EOS Mainnet will be more reliable and sec
 
 ## Appendix
 
-Current msig status of TOP 30 Block Producers(2020-05-08):
+Current msig status of TOP 40 Block Producers(2020-05-08):
 
 Note: by `msig`, we mean both the `owner` and `active` permissions are msiged.
 
