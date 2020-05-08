@@ -1,1 +1,1 @@
-docker build . -t eoslaomao/eos-auto-kicker:0.5 --no-cache
+docker build . -t eoslaomao/eos-auto-kicker:0.7 --no-cache
