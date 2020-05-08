@@ -10,6 +10,9 @@ const { IncomingWebhook } = require('@slack/webhook');
 const signatureProvider = new JsSignatureProvider([config.PROPOSER_PRIVATE_KEY]);
 const rpc = new JsonRpc(config.RPC_HOST, { fetch });
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+
+console.log("config:", config);
+
 let ENABLE_SLACK = false
 if(config.SLACK_WEBHOOK_URL) {
   const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
