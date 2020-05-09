@@ -1,15 +1,15 @@
 # BP Kicking Proposal Moniter
 
-Monitor BP Kicking Proposals from [Block Producer Reliability Tracker] by Aloha EOS(https://t.me/EOS_Mainnet_Aloha_Tracker) and auto propose for your msig-ed BP account if it found one.
+Monitor BP Kicking Proposals from [Block Producer Reliability Tracker] by Aloha EOS(https://t.me/EOS_Mainnet_Aloha_Tracker) and auto propose a approval proposal for your msig-ed BP account and notify you if it found one.
 
 Features and highlights:
 
 * Docker based, simple to deploy.
 * Auto propose a proposal for your Block Producer account, which approves BP kicking proposal(missing >=3 rounds in a row) proposed by Block Producer Reliability Tracker.
-* It has Slack Bot Notification! Yay!
+* Slack Bot Notification! Yay!
 * No keys or permissions related to your BP account is needed to use this tool.
 
-Note: This tool is designed for msig-ed Block Producer account only. For Block Producers (especially top 21) who has not msig-ed their account, we hignly recommend they do it ASAP to secure EOS Mainnet. Please refer to the Appendix below for current msig status of TOP 40 Block Producers on EOS Mainnet.
+Note: This tool is designed for msig-ed Block Producer account only. For Block Producers (especially top 21) who has not msig-ed their account, we highly recommend they do so ASAP for a more secure EOS Mainnet. Please refer to the Appendix below for current msig status of TOP 40 Block Producers on EOS Mainnet.
 
 ## Usage
 
@@ -33,7 +33,7 @@ Note: This is only used to craft a proposal, you don't need to provide any secre
 
 #### PROPOSER_ACCOUNT
 Account used to propose proposal.
-* Note: This is should be a seperate account controlled by a seperate key, DO NOT use BP account. Also, make sure it has sufficient resource to fire tx.
+* Note: This is should be a seperate account controlled by a seperate key, DO NOT use your BP account. Also, make sure it has sufficient resource to fire tx.
 
 #### PROPOSER_PRIVATE_KEY
 Secret key for `PROPOSER_ACCOUNT`
@@ -56,7 +56,7 @@ You can check logs using:
 docker logs -f eos-auto-kicker
 ```
 
-This container will running as deamon, it will check BP kicking proposals proposed by Block Producer Reliability Tracker every 1 minute. When there are kicking proposals found, the approval proposal will be proposed automatically. At the same time, you will get notified in your Slack channal. All you need to do then, is to decide to approve it or not.
+This container runs as deamon, it will check BP kicking proposals proposed by Block Producer Reliability Tracker every 1 minute. When kicking proposals found, the approval proposal will be proposed automatically. At the same time, you will get notified in your Slack channal. All you need to do then, is to decide to approve it or not.
 
 
 We believe, with this little tool, the EOS Mainnet will be more reliable and secure.
