@@ -1,1 +1,1 @@
-docker build . -t eoslaomao/eos-auto-kicker:0.7 --no-cache
+docker build . -t eoslaomao/bp-kicking-proposal-monitor:0.8 --no-cache
