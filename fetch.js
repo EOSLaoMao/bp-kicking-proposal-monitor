@@ -13,11 +13,6 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
 
 console.log("config:", config);
 
-let ENABLE_SLACK = false
-if(config.SLACK_WEBHOOK_URL) {
-  const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
-  ENABLE_SLACK = true
-}
 if(config.SENTRY_DSN) {
   Sentry.init({ dsn: config.SENTRY_DSN });
 }
@@ -43,14 +38,13 @@ function fetch_bp_permission() {
 // Notify via slack
 function notify_slack(msg) {
   console.log(msg);
-  if(ENABLE_SLACK) {
-    // Send the notification via slack
-    (async () => {
-      await webhook.send({
-        text: msg
-      });
-    })();
-  }
+  let webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
+  // Send the notification via slack
+  (async () => {
+    await webhook.send({
+      text: msg
+    });
+  })();
 }
 
 function cancel_proposal(proposal){
