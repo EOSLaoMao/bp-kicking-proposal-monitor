@@ -186,6 +186,17 @@ function monitor(){
       });
       let proposed_proposals = resp.rows;
 
+      // Get approvals, if already approved, just ignore it
+      resp = await rpc.get_table_rows({
+        json: true,                                 // Get the response as json
+        code: 'eosio.msig',                         // Contract that we target
+        scope: config.ALOHA_TRACKER_ACCOUNT,        // Account that owns the data
+        table: 'approvals2',                          // Table name
+        limit: 10,                                  // Maximum number of rows that we want to get
+        reverse: false                              // False, means newest appear first
+      });
+      let approvals = resp.rows;
+
       
       if(kicking_proposals.length == 0) {
         if(proposed_proposals.length > 0) {
@@ -210,6 +221,21 @@ function monitor(){
             proposal_needed = false;
           }
         });
+
+        if (approvals.length > 0){
+          let approval = approvals[0]
+          if (approval.proposal_name == kicking_proposal.proposal_name) {
+            approval.provided_approvals.forEach(function(p){
+              if (p.level.actor == config.BP_ACCOUNT) {
+                msg = "Kicking proposal already approved, good job!"
+                consolg.log(msg)
+                notify_slack(msg)
+                proposal_needed = false
+              }
+            })
+          }
+        }
+
         if(proposal_needed) {
           console.log("Prepare to approve kicking proposal:", kicking_proposal.proposal_name);
           //Step2: propose to approve this kicking proposal
@@ -219,7 +245,7 @@ function monitor(){
     }
   })();
   // Check proposals every minute
-  setTimeout(monitor, 1000 * 60);
+  setTimeout(monitor, 1000 * 30);
 }
 
 monitor();
