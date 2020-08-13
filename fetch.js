@@ -228,7 +228,7 @@ function monitor(){
             approval.provided_approvals.forEach(function(p){
               if (p.level.actor == config.BP_ACCOUNT) {
                 msg = "Kicking proposal already approved, good job!"
-                consolg.log(msg)
+                console.log(msg)
                 notify_slack(msg)
                 proposal_needed = false
               }
