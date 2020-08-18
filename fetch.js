@@ -211,13 +211,18 @@ function monitor(){
       } else {
         // Only process the first(newest) kicking proposal
         let kicking_proposal = kicking_proposals[0];
-        let msg = util.format('Found kicking proposal: %s. Time: %s', kicking_proposal.proposal_name, now);
-        notify_slack(msg);
+        let found_proposal_msg = util.format('Found kicking proposal: %s. Time: %s', kicking_proposal.proposal_name, now);
         let proposal_needed = true;
+        var datetime = new Date();
+        var minute = parseInt(datetime.toISOString().slice(14,16));
         proposed_proposals.forEach(function(value){
           if(value.proposal_name == kicking_proposal.proposal_name) {
-            let msg = util.format('Kicking proposal already proposed, please review ASAP: https://bloks.io/msig/%s/%s Time: %s', config.PROPOSER_ACCOUNT, kicking_proposal.proposal_name, now);
-            notify_slack(msg);
+            //Notify user every 5 minutes
+            if (minute % 5 == 0) {
+              notify_slack(found_proposal_msg);
+              let msg = util.format('Kicking proposal already proposed, please review ASAP: https://bloks.io/msig/%s/%s Time: %s', config.PROPOSER_ACCOUNT, kicking_proposal.proposal_name, now);
+              notify_slack(msg);
+            }
             proposal_needed = false;
           }
         });
@@ -227,9 +232,12 @@ function monitor(){
           if (approval.proposal_name == kicking_proposal.proposal_name) {
             approval.provided_approvals.forEach(function(p){
               if (p.level.actor == config.BP_ACCOUNT) {
-                msg = "Kicking proposal already approved, good job!"
-                console.log(msg)
-                notify_slack(msg)
+                //Notify user every 5 minutes
+                if (minute % 5 == 0) {
+                  notify_slack(found_proposal_msg);
+                  msg = "Kicking proposal already approved, good job!"
+                  notify_slack(msg)
+                }
                 proposal_needed = false
               }
             })
@@ -245,7 +253,7 @@ function monitor(){
     }
   })();
   // Check proposals every minute
-  setTimeout(monitor, 1000 * 30);
+  setTimeout(monitor, 1000 * 60);
 }
 
 monitor();
