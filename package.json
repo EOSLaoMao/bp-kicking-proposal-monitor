@@ -3,6 +3,6 @@
     "@sentry/node": "^5.15.4",
     "@slack/webhook": "^5.0.3",
     "eosjs": "^20.0.3",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.7"
   }
 }
